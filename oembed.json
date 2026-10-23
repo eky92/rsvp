@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "type": "rich",
+  "provider_name": "RSVP",
+  "provider_url": "https://YOUR-USERNAME.github.io/rsvp/",
+  "title": "RSVP",
+  "width": 600,
+  "height": 900,
+  "html": "<iframe src=\"https://script.google.com/macros/s/AKfycbxcekXdQpRb9JFkyjAOgAuycWhu134coXUcy-oAQJ-svPnUVWi2wrQqpfpAPpAuJPXv/exec\" width=\"600\" height=\"900\" style=\"border:0\" title=\"RSVP form\"></iframe>"
+}
