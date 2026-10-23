@@ -1,35 +1,428 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>RSVP</title>
-
-  <!-- Basic page info -->
-  <meta property="og:title" content="RSVP">
-  <meta property="og:description" content="RSVP for our wedding">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://eky92.github.io/rsvp/">
-
-  <!-- Embed metadata: tells Canva's embed service this page can be shown as an interactive player -->
-  <link rel="alternate" type="application/json+oembed"
-        href="https://eky92.github.io/rsvp/oembed.json"
-        title="RSVP">
-  <meta name="twitter:card" content="player">
-  <meta name="twitter:title" content="RSVP">
-  <meta name="twitter:player" content="https://script.google.com/macros/s/AKfycbxcekXdQpRb9JFkyjAOgAuycWhu134coXUcy-oAQJ-svPnUVWi2wrQqpfpAPpAuJPXv/exec">
-  <meta name="twitter:player:width" content="600">
-  <meta name="twitter:player:height" content="900">
-
-  <style>
-    html, body { margin: 0; padding: 0; height: 100%; background: #ffffff; }
-    iframe { display: block; width: 100%; height: 100%; border: 0; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RSVP</title>
+<meta property="og:title" content="RSVP">
+<meta property="og:description" content="RSVP for our wedding">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500&display=swap">
+<style>
+  :root {
+    --cream: #faf6ef;
+    --card: #ffffff;
+    --ink: #2e2a27;
+    --muted: #7a726b;
+    --moss: #5d6b3f;
+    --moss-dark: #48552f;
+    --burgundy: #7a2e3b;
+    --blush: #f3dfdc;
+    --line: #e4dcd0;
+    --err: #a3262f;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Jost', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 28px 18px 48px; }
+  h1, h2 {
+    font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+    font-weight: 600;
+    margin: 0;
+    color: var(--burgundy);
+    text-align: center;
+  }
+  h1 { font-size: 40px; line-height: 1.1; letter-spacing: .5px; min-height: 44px; }
+  h2 { font-size: 30px; line-height: 1.15; }
+  .sub { text-align: center; color: var(--muted); margin: 10px 0 0; }
+  .rule { width: 56px; height: 2px; background: var(--moss); margin: 18px auto 22px; border: 0; opacity: .7; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 20px;
+    box-shadow: 0 1px 2px rgba(60,40,30,.04);
+  }
+  label.lbl { display: block; font-weight: 500; margin-bottom: 6px; }
+  .hint { color: var(--muted); font-size: 14px; margin: 6px 0 0; }
+  input[type=text], input[type=email], textarea {
+    width: 100%;
+    font: inherit;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    min-height: 48px;
+  }
+  textarea { min-height: 84px; resize: vertical; }
+  input:focus, textarea:focus, button:focus-visible, .choice:focus-within {
+    outline: 3px solid rgba(93,107,63,.35);
+    outline-offset: 1px;
+    border-color: var(--moss);
+  }
+  button.btn {
+    display: block;
+    width: 100%;
+    font: inherit;
+    font-weight: 500;
+    letter-spacing: .3px;
+    color: #fff;
+    background: var(--moss);
+    border: 0;
+    border-radius: 10px;
+    padding: 14px 18px;
+    min-height: 50px;
+    cursor: pointer;
+    margin-top: 16px;
+  }
+  button.btn:hover { background: var(--moss-dark); }
+  button.btn[disabled] { opacity: .6; cursor: default; }
+  button.link {
+    background: none; border: 0; padding: 8px 0; font: inherit; color: var(--moss-dark);
+    text-decoration: underline; cursor: pointer; display: block; margin: 14px auto 0;
+  }
+  .err {
+    margin-top: 12px; padding: 10px 12px; border-radius: 10px;
+    background: #fbeaea; color: var(--err); font-size: 15px;
+  }
+  .note {
+    margin-top: 14px; padding: 10px 12px; border-radius: 10px;
+    background: var(--blush); color: #5a3a3a; font-size: 15px;
+  }
+  .member { padding: 18px 0; border-top: 1px solid var(--line); }
+  .member:first-of-type { border-top: 0; padding-top: 4px; }
+  .member .who {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 24px; font-weight: 600; color: var(--ink); margin: 0 0 10px;
+  }
+  .choices { display: flex; gap: 10px; }
+  .choice {
+    flex: 1; display: flex; align-items: center; justify-content: center; text-align: center;
+    min-height: 50px; padding: 10px 12px;
+    border: 1px solid var(--line); border-radius: 10px; cursor: pointer; background: #fff;
+    transition: background .12s, border-color .12s;
+  }
+  .choice input { position: absolute; opacity: 0; pointer-events: none; }
+  .choice.on-yes { background: var(--moss); border-color: var(--moss); color: #fff; }
+  .choice.on-no { background: var(--burgundy); border-color: var(--burgundy); color: #fff; }
+  .extra { margin-top: 12px; }
+  .extra[hidden] { display: none; }
+  .sect { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .thanks-list { list-style: none; padding: 0; margin: 18px 0 0; }
+  .thanks-list li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .thanks-list li:first-child { border-top: 0; }
+  .tag-yes { color: var(--moss-dark); font-weight: 500; }
+  .tag-no { color: var(--burgundy); font-weight: 500; }
+  [hidden] { display: none !important; }
+  @media (max-width: 380px) {
+    h1 { font-size: 34px; }
+    .choices { flex-direction: column; }
+  }
+</style>
 </head>
 <body>
-  <iframe
-    src="https://script.google.com/macros/s/AKfycbxcekXdQpRb9JFkyjAOgAuycWhu134coXUcy-oAQJ-svPnUVWi2wrQqpfpAPpAuJPXv/exec"
-    title="RSVP form"
-    allow="clipboard-write"></iframe>
+<div class="wrap">
+  <header>
+    <h1 id="couple"></h1>
+    <p class="sub" id="eventLine"></p>
+    <hr class="rule">
+  </header>
+
+  <!-- Step 1: find invitation -->
+  <section id="stepLookup" class="card" aria-live="polite">
+    <form id="lookupForm" novalidate>
+      <label class="lbl" for="nameInput">Enter your full name to begin</label>
+      <input type="text" id="nameInput" autocomplete="name" autocapitalize="words" spellcheck="false" placeholder="First and last name">
+      <p class="hint">Type your name as it appears on your invitation. You&rsquo;ll be able to respond for your whole party.</p>
+      <div id="lookupErr" class="err" hidden role="alert"></div>
+      <button class="btn" id="lookupBtn" type="submit" disabled>Loading…</button>
+    </form>
+    <p class="hint" id="deadline" style="text-align:center;margin-top:16px" hidden></p>
+    <p class="hint" id="contact" style="text-align:center" hidden></p>
+  </section>
+
+  <!-- Step 2: respond -->
+  <section id="stepForm" hidden>
+    <h2 id="hello"></h2>
+    <p class="sub">Please respond for each guest below.</p>
+    <hr class="rule">
+    <div class="card">
+      <form id="rsvpForm" novalidate>
+        <div id="members"></div>
+
+        <div class="sect">
+          <label class="lbl" for="emailInput">Email for confirmation updates <span class="hint" style="display:inline">(optional)</span></label>
+          <input type="email" id="emailInput" autocomplete="email" inputmode="email">
+        </div>
+        <div class="sect" style="margin-top:14px;padding-top:0;border-top:0">
+          <label class="lbl" for="msgInput">A note for us <span class="hint" style="display:inline">(optional)</span></label>
+          <textarea id="msgInput" maxlength="1000"></textarea>
+        </div>
+
+        <div id="formNote" class="note" hidden></div>
+        <div id="formErr" class="err" hidden role="alert"></div>
+        <button class="btn" id="submitBtn" type="submit">Send RSVP</button>
+      </form>
+    </div>
+    <button class="link" id="notMe" type="button">Not you? Start over</button>
+  </section>
+
+  <!-- Step 3: done -->
+  <section id="stepDone" hidden>
+    <h2>Thank you!</h2>
+    <p class="sub" id="doneSub">Your response has been received.</p>
+    <hr class="rule">
+    <div class="card">
+      <ul class="thanks-list" id="doneList"></ul>
+      <p class="hint" id="editHint" style="margin-top:16px;text-align:center">Plans changed? Come back anytime and enter your name again to update your response.</p>
+    </div>
+    <button class="link" id="again" type="button">Done</button>
+  </section>
+</div>
+
+<script>
+// Your Apps Script web app URL. If you ever create a NEW deployment, update this line.
+const API_URL = 'https://script.google.com/macros/s/AKfycbxcekXdQpRb9JFkyjAOgAuycWhu134coXUcy-oAQJ-svPnUVWi2wrQqpfpAPpAuJPXv/exec';
+
+(function () {
+  const $ = id => document.getElementById(id);
+  let CFG = null;
+  let party = null;   // {partyKey, greeting, members, previous}
+  const state = {};   // memberId -> {attending, name, dietary}
+
+  /* ---------- server calls ----------
+     Sends a plain-text POST so the browser doesn't need a CORS preflight,
+     and sends no Google cookies, so signed-in accounts never interfere. */
+  function api(action, data) {
+    return fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(Object.assign({ action: action }, data || {}))
+    }).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    });
+  }
+
+  /* ---------- helpers ---------- */
+  function el(tag, attrs, kids) {
+    const n = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(k => {
+      if (k === 'class') n.className = attrs[k];
+      else if (k === 'text') n.textContent = attrs[k];
+      else n.setAttribute(k, attrs[k]);
+    });
+    (kids || []).forEach(c => n.appendChild(c));
+    return n;
+  }
+  function show(id) {
+    ['stepLookup', 'stepForm', 'stepDone'].forEach(s => { $(s).hidden = (s !== id); });
+    window.scrollTo(0, 0);
+  }
+  function showMsg(node, text) {
+    node.textContent = text || '';
+    node.hidden = !text;
+  }
+  function busy(btn, on, label) {
+    btn.disabled = on;
+    if (label) btn.textContent = label;
+  }
+
+  /* ---------- header / config ---------- */
+  function applyConfig(cfg) {
+    CFG = cfg;
+    $('couple').textContent = CFG.coupleNames || '';
+    $('eventLine').textContent = CFG.eventLine || '';
+    if (CFG.deadline) { $('deadline').textContent = CFG.deadline; $('deadline').hidden = false; }
+    if (CFG.contact) { $('contact').textContent = CFG.contact; $('contact').hidden = false; }
+    if (!CFG.open) {
+      showMsg($('lookupErr'), 'RSVPs are now closed. Please contact us directly.');
+      busy($('lookupBtn'), true, 'Find my invitation');
+      $('nameInput').disabled = true;
+    } else {
+      busy($('lookupBtn'), false, 'Find my invitation');
+    }
+  }
+
+  api('config')
+    .then(function (res) {
+      if (!res || !res.ok) throw new Error('bad config');
+      applyConfig(res.config);
+    })
+    .catch(function () {
+      busy($('lookupBtn'), true, 'Find my invitation');
+      showMsg($('lookupErr'), 'We couldn’t load the RSVP form. Please refresh the page to try again.');
+    });
+
+  /* ---------- lookup ---------- */
+  $('lookupForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!CFG || !CFG.open) return;
+    showMsg($('lookupErr'), '');
+    const typed = $('nameInput').value.trim();
+    if (typed.length < 2) { showMsg($('lookupErr'), 'Please enter your full name.'); return; }
+    busy($('lookupBtn'), true, 'Looking…');
+    api('lookup', { name: typed })
+      .then(function (res) {
+        busy($('lookupBtn'), false, 'Find my invitation');
+        if (!res || !res.ok) { showMsg($('lookupErr'), (res && res.message) || 'Something went wrong. Please try again.'); return; }
+        party = res;
+        renderForm();
+        show('stepForm');
+      })
+      .catch(function () {
+        busy($('lookupBtn'), false, 'Find my invitation');
+        showMsg($('lookupErr'), 'We couldn’t reach the server. Please check your connection and try again.');
+      });
+  });
+
+  /* ---------- form ---------- */
+  function choice(memberId, value, label, current) {
+    const id = 'r_' + memberId + '_' + value;
+    const input = el('input', { type: 'radio', name: 'att_' + memberId, id: id, value: value });
+    if (current === value) input.checked = true;
+    const wrap = el('label', { class: 'choice', for: id }, [input, el('span', { text: label })]);
+    return { wrap: wrap, input: input };
+  }
+
+  function renderForm() {
+    $('hello').textContent = 'Hello, ' + (party.greeting || 'friend') + '!';
+    const host = $('members');
+    host.textContent = '';
+    Object.keys(state).forEach(k => delete state[k]);
+    const prev = party.previous;
+    showMsg($('formNote'), prev ? 'We found your earlier response. You can review and update it below.' : '');
+    showMsg($('formErr'), '');
+    $('emailInput').value = prev ? prev.email : '';
+    $('msgInput').value = prev ? prev.message : '';
+
+    party.members.forEach(function (m) {
+      const p = prev && prev.members[m.id] ? prev.members[m.id] : null;
+      const s = state[m.id] = {
+        attending: p ? p.attending : '',
+        name: p && m.role !== 'guest' ? p.name : m.name,
+        dietary: p ? p.dietary : ''
+      };
+      const box = el('div', { class: 'member', 'data-id': m.id });
+      const isOpen = m.role === 'open_plus';
+
+      if (isOpen) {
+        box.appendChild(el('p', { class: 'who', text: 'Additional Guest' }));
+        box.appendChild(el('p', { class: 'hint', text: 'You’re welcome to bring a guest. Will someone be joining you?', style: 'margin:-4px 0 10px' }));
+      } else {
+        box.appendChild(el('p', { class: 'who', text: m.name }));
+      }
+
+      const yes = choice(m.id, 'yes', isOpen ? 'Yes, I’ll bring a guest' : 'Joyfully accepts', s.attending);
+      const no = choice(m.id, 'no', isOpen ? 'No, just me' : 'Regretfully declines', s.attending);
+      const row = el('div', { class: 'choices', role: 'radiogroup', 'aria-label': isOpen ? 'Bringing a guest' : 'Attendance for ' + m.name }, [yes.wrap, no.wrap]);
+      box.appendChild(row);
+
+      // Extra fields (guest name for open plus-one, plus dietary notes).
+      const extra = el('div', { class: 'extra' });
+      let nameInput = null;
+      if (isOpen || m.role === 'named_plus') {
+        const nid = 'n_' + m.id;
+        nameInput = el('input', { type: 'text', id: nid, maxlength: '120', autocomplete: 'off', placeholder: 'Guest’s full name' });
+        nameInput.value = s.name || '';
+        nameInput.addEventListener('input', function () { s.name = nameInput.value; });
+        extra.appendChild(el('label', { class: 'lbl', for: nid, text: isOpen ? 'Your guest’s full name' : 'Guest name' }));
+        extra.appendChild(nameInput);
+        if (m.role === 'named_plus') extra.appendChild(el('p', { class: 'hint', text: 'Update this if the name is different.' }));
+      }
+      const did = 'd_' + m.id;
+      const diet = el('input', { type: 'text', id: did, maxlength: '300', autocomplete: 'off', placeholder: 'Allergies or dietary needs (optional)' });
+      diet.value = s.dietary || '';
+      diet.addEventListener('input', function () { s.dietary = diet.value; });
+      const dietWrap = el('div', { style: 'margin-top:10px' }, [diet]);
+      extra.appendChild(dietWrap);
+      box.appendChild(extra);
+
+      function sync() {
+        const v = s.attending;
+        yes.wrap.classList.toggle('on-yes', v === 'yes');
+        no.wrap.classList.toggle('on-no', v === 'no');
+        extra.hidden = (v !== 'yes');
+      }
+      [yes, no].forEach(function (c) {
+        c.input.addEventListener('change', function () {
+          s.attending = c.input.value;
+          sync();
+          showMsg($('formErr'), '');
+        });
+      });
+      sync();
+      host.appendChild(box);
+    });
+  }
+
+  $('rsvpForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    showMsg($('formErr'), '');
+    const answers = [];
+    for (const m of party.members) {
+      const s = state[m.id];
+      if (m.role === 'open_plus') {
+        if (s.attending !== 'yes' && s.attending !== 'no') { showMsg($('formErr'), 'Please tell us whether you’re bringing a guest.'); return; }
+        if (s.attending === 'yes' && !String(s.name || '').trim()) { showMsg($('formErr'), 'Please enter your guest’s name.'); return; }
+      } else if (s.attending !== 'yes' && s.attending !== 'no') {
+        showMsg($('formErr'), 'Please respond for ' + m.name + '.'); return;
+      }
+      answers.push({ id: m.id, attending: s.attending, name: s.name || '', dietary: s.attending === 'yes' ? (s.dietary || '') : '' });
+    }
+    busy($('submitBtn'), true, 'Sending…');
+    api('submit', {
+      payload: {
+        partyKey: party.partyKey,
+        answers: answers,
+        email: $('emailInput').value,
+        message: $('msgInput').value
+      }
+    })
+      .then(function (res) {
+        busy($('submitBtn'), false, 'Send RSVP');
+        if (!res || !res.ok) { showMsg($('formErr'), (res && res.message) || 'Something went wrong. Please try again.'); return; }
+        renderDone(res.summary || []);
+        show('stepDone');
+      })
+      .catch(function () {
+        busy($('submitBtn'), false, 'Send RSVP');
+        showMsg($('formErr'), 'We couldn’t reach the server. Your answers are still here. Please try again.');
+      });
+  });
+
+  function renderDone(summary) {
+    const list = $('doneList');
+    list.textContent = '';
+    const anyYes = summary.some(x => x.attending === 'yes');
+    $('doneSub').textContent = anyYes ? 'We can’t wait to celebrate with you.' : 'We’re sorry you can’t make it, and we’ll miss you.';
+    summary.forEach(function (x) {
+      list.appendChild(el('li', {}, [
+        el('span', { text: x.name }),
+        el('span', { class: x.attending === 'yes' ? 'tag-yes' : 'tag-no', text: x.attending === 'yes' ? 'Attending' : 'Not attending' })
+      ]));
+    });
+  }
+
+  function reset() {
+    party = null;
+    $('nameInput').value = '';
+    showMsg($('lookupErr'), '');
+    show('stepLookup');
+    $('nameInput').focus();
+  }
+  $('notMe').addEventListener('click', reset);
+  $('again').addEventListener('click', reset);
+})();
+</script>
 </body>
 </html>
