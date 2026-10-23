@@ -122,6 +122,14 @@
   .thanks-list li:first-child { border-top: 0; }
   .tag-yes { color: var(--moss-dark); font-weight: 500; }
   .tag-no { color: var(--burgundy); font-weight: 500; }
+  .pick {
+    display: block; width: 100%; text-align: left;
+    font: inherit; color: var(--ink); background: #fff;
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; min-height: 50px; cursor: pointer; margin-top: 10px;
+  }
+  .pick:hover { border-color: var(--moss); background: #f7f8f2; }
+  .pick[disabled] { opacity: .6; cursor: default; }
   [hidden] { display: none !important; }
   @media (max-width: 380px) {
     h1 { font-size: 34px; }
@@ -146,6 +154,11 @@
       <div id="lookupErr" class="err" hidden role="alert"></div>
       <button class="btn" id="lookupBtn" type="submit" disabled>Loading…</button>
     </form>
+    <div id="pickBox" hidden>
+      <p class="lbl" style="margin-top:18px;margin-bottom:0">We found more than one invitation with that name. Which one is yours?</p>
+      <div id="pickList"></div>
+      <button class="link" id="pickNone" type="button">None of these</button>
+    </div>
     <p class="hint" id="deadline" style="text-align:center;margin-top:16px" hidden></p>
     <p class="hint" id="contact" style="text-align:center" hidden></p>
   </section>
@@ -264,25 +277,72 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbxKOPZ_sh3fS9SWHcfP5N7i
     });
 
   /* ---------- lookup ---------- */
-  $('lookupForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    if (!CFG || !CFG.open) return;
+  let lastTyped = '';
+
+  function hidePicks() {
+    $('pickBox').hidden = true;
+    $('pickList').textContent = '';
+  }
+  function setPicksDisabled(on) {
+    Array.prototype.forEach.call($('pickList').querySelectorAll('button'), function (b) { b.disabled = on; });
+  }
+  function renderPicks(choices) {
+    const list = $('pickList');
+    list.textContent = '';
+    choices.forEach(function (c) {
+      const b = el('button', { class: 'pick', type: 'button', text: c.label });
+      b.addEventListener('click', function () { doLookup(lastTyped, c.partyKey); });
+      list.appendChild(b);
+    });
+    $('pickBox').hidden = false;
+  }
+
+  function doLookup(typed, partyKey) {
     showMsg($('lookupErr'), '');
-    const typed = $('nameInput').value.trim();
-    if (typed.length < 2) { showMsg($('lookupErr'), 'Please enter your full name.'); return; }
     busy($('lookupBtn'), true, 'Looking…');
-    api('lookup', { name: typed })
+    setPicksDisabled(true);
+    api('lookup', { name: typed, partyKey: partyKey || '' })
       .then(function (res) {
         busy($('lookupBtn'), false, 'Find my invitation');
-        if (!res || !res.ok) { showMsg($('lookupErr'), (res && res.message) || 'Something went wrong. Please try again.'); return; }
+        setPicksDisabled(false);
+        if (res && res.ambiguous && Array.isArray(res.choices) && res.choices.length) {
+          renderPicks(res.choices);
+          return;
+        }
+        if (!res || !res.ok) {
+          hidePicks();
+          showMsg($('lookupErr'), (res && res.message) || 'Something went wrong. Please try again.');
+          return;
+        }
+        hidePicks();
         party = res;
         renderForm();
         show('stepForm');
       })
       .catch(function () {
         busy($('lookupBtn'), false, 'Find my invitation');
+        setPicksDisabled(false);
         showMsg($('lookupErr'), 'We couldn’t reach the server. Please check your connection and try again.');
       });
+  }
+
+  $('lookupForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!CFG || !CFG.open) return;
+    showMsg($('lookupErr'), '');
+    hidePicks();
+    const typed = $('nameInput').value.trim();
+    if (typed.length < 2) { showMsg($('lookupErr'), 'Please enter your full name.'); return; }
+    lastTyped = typed;
+    doLookup(typed);
+  });
+
+  $('pickNone').addEventListener('click', function () {
+    hidePicks();
+    showMsg($('lookupErr'), CFG && CFG.contact
+      ? 'Please check the spelling of your name, or reach out to us. ' + CFG.contact
+      : 'Please check the spelling of your name, or contact us directly.');
+    $('nameInput').focus();
   });
 
   /* ---------- form ---------- */
@@ -417,6 +477,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbxKOPZ_sh3fS9SWHcfP5N7i
     party = null;
     $('nameInput').value = '';
     showMsg($('lookupErr'), '');
+    hidePicks();
     show('stepLookup');
     $('nameInput').focus();
   }
